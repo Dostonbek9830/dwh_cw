@@ -89,19 +89,6 @@ def transform_weather_to_dim(df, dim_date):
 
     return df[['date_id', 'temperature', 'precipitation']]
 
-
-def transform_location_groups_to_dim(df):
-    location_group_df = df.copy()
-    location_group_df["location_group"] = (
-        location_group_df["location_group"]
-        .fillna("unknown")
-        .astype(str)
-        .str.strip()
-        .replace("", "unknown")
-    )
-    return location_group_df[["location_group"]].drop_duplicates().reset_index(drop=True)
-
-
 def create_fact_table(df):
     fact = df.copy()
 

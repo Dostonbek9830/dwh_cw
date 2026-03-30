@@ -4,7 +4,7 @@ from psycopg2.extras import execute_values
 from sqlalchemy import create_engine
 from sqlalchemy.engine import URL
 
-from config.config import DB_CONFIG, WEATHER_DB_CONFIG, LOCATION_DB_CONFIG
+from config.config import DB_CONFIG, WEATHER_DB_CONFIG
 
 
 def get_connection():
@@ -118,22 +118,6 @@ def load_dim_payment(df):
     )
     conn.close()
 
-
-def load_dim_location_group(df):
-    rows = [(row.location_group,) for row in df.itertuples(index=False)]
-    conn = get_connection()
-    _bulk_insert(
-        conn,
-        """
-        INSERT INTO dim_location_group (location_group)
-        VALUES %s
-        ON CONFLICT DO NOTHING
-        """,
-        rows,
-    )
-    conn.close()
-
-
 def normalize_location(df):
     normalized = df.copy()
     normalized["kiosk_id"] = pd.to_numeric(normalized["kiosk_id"], errors="coerce").fillna(-1).astype(int).astype(str)
@@ -195,45 +179,10 @@ def load_weather_to_source(df):
     conn.close()
     print("Weather loaded into weather_db")
 
-
-def load_location_groups_to_source(df):
-    rows = [(row.location_group,) for row in df.itertuples(index=False)]
-    conn = psycopg2.connect(**LOCATION_DB_CONFIG)
-    with conn.cursor() as cur:
-        cur.execute(
-            """
-            CREATE TABLE IF NOT EXISTS location_group_data (
-                location_group_id SERIAL PRIMARY KEY,
-                location_group TEXT UNIQUE
-            )
-            """
-        )
-        conn.commit()
-    _bulk_insert(
-        conn,
-        """
-        INSERT INTO location_group_data (location_group)
-        VALUES %s
-        ON CONFLICT DO NOTHING
-        """,
-        rows,
-    )
-    conn.close()
-    print("Location groups loaded into location_db")
-
-
 def extract_weather_from_db():
     engine = _make_engine(WEATHER_DB_CONFIG)
     with engine.connect() as conn:
         df = pd.read_sql("SELECT * FROM weather_data", conn)
-    engine.dispose()
-    return df
-
-
-def extract_location_groups_from_db():
-    engine = _make_engine(LOCATION_DB_CONFIG)
-    with engine.connect() as conn:
-        df = pd.read_sql("SELECT location_group FROM location_group_data", conn)
     engine.dispose()
     return df
 

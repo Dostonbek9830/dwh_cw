@@ -12,7 +12,6 @@ def create_tables():
     cur.execute("DROP TABLE IF EXISTS dim_location CASCADE")
     cur.execute("DROP TABLE IF EXISTS dim_source CASCADE")
     cur.execute("DROP TABLE IF EXISTS dim_payment CASCADE")
-    cur.execute("DROP TABLE IF EXISTS dim_location_group CASCADE")
     cur.execute("DROP TABLE IF EXISTS dim_weather CASCADE")
 
     # DIM DATE
@@ -62,14 +61,6 @@ def create_tables():
     """)
 
     cur.execute("""
-    CREATE TABLE dim_location_group (
-        location_group_id SERIAL PRIMARY KEY,
-        location_group TEXT UNIQUE
-    )
-    """)
-
-  
-    cur.execute("""
         CREATE TABLE dim_weather (
             weather_id SERIAL PRIMARY KEY,
             date_id INT UNIQUE,
@@ -105,7 +96,6 @@ def create_tables():
     cur.execute("CREATE INDEX idx_fact_payment_id ON fact_parking_transaction(payment_id)")
     cur.execute("CREATE INDEX idx_dim_date_full_date ON dim_date(full_date)")
     cur.execute("CREATE INDEX idx_dim_location_group ON dim_location(location_group)")
-    cur.execute("CREATE INDEX idx_dim_location_group_name ON dim_location_group(location_group)")
 
     conn.commit()
     cur.close()
