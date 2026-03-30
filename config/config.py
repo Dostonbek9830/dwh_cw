@@ -14,11 +14,3 @@ WEATHER_DB_CONFIG = {
     "password": "1998"
 }
 
-LOCATION_DB_CONFIG = {
-    "host": "localhost",
-    "port": "5432",
-    "database": "location_db",
-    "user": "postgres",
-    "password": "1998"
-}
-
